@@ -1,14 +1,38 @@
-import * as mammoth from "mammoth";
-import { unzipSync, zipSync, strFromU8, strToU8 } from "fflate";
+import { unzipSync, strFromU8 } from "fflate";
 
 const PAGE_MARKER = "XQZPAGEBREAKZQX";
 
-interface MammothResult {
-	value: string;
-}
+/**
+ * استخراج متن ساده از document.xml (بدون mammoth)
+ * این تابع پاراگراف‌ها را از XML استخراج می‌کند.
+ */
+function extractTextFromDocxXml(xml: string): string {
+	const paragraphs: string[] = [];
+	// هر پاراگراف <w:p> ... </w:p>
+	const paraRegex = /<w:p[ >][\s\S]*?<\/w:p>/g;
+	let paraMatch: RegExpExecArray | null;
 
-interface MammothModule {
-	convertToMarkdown: (opts: { arrayBuffer: ArrayBuffer }) => Promise<MammothResult>;
+	while ((paraMatch = paraRegex.exec(xml)) !== null) {
+		const paraXml = paraMatch[0];
+		// استخراج متن‌های <w:t>...</w:t>
+		const textParts: string[] = [];
+		const textRegex = /<w:t[^>]*>([\s\S]*?)<\/w:t>/g;
+		let textMatch: RegExpExecArray | null;
+		while ((textMatch = textRegex.exec(paraXml)) !== null) {
+			textParts.push(textMatch[1]);
+		}
+		const text = textParts.join("");
+		// unescape XML entities
+		const unescaped = text
+			.replace(/&amp;/g, "&")
+			.replace(/&lt;/g, "<")
+			.replace(/&gt;/g, ">")
+			.replace(/&quot;/g, '"')
+			.replace(/&apos;/g, "'");
+		paragraphs.push(unescaped);
+	}
+
+	return paragraphs.join("\n");
 }
 
 export async function wordToPages(
@@ -23,37 +47,21 @@ export async function wordToPages(
 
 	let xml = strFromU8(docFile);
 
+	// جایگزینی page break ها با marker
 	xml = xml.replace(
 		/<w:br[^>]*w:type="page"[^>]*\/>/g,
-		`<w:t xml:space="preserve">${PAGE_MARKER}</w:t>`
+		`</w:p><w:p><w:r><w:t>${PAGE_MARKER}</w:t></w:r></w:p><w:p>`
 	);
 	xml = xml.replace(
 		/<w:lastRenderedPageBreak\/>/g,
-		`<w:t xml:space="preserve">${PAGE_MARKER}</w:t>`
-	);
-	xml = xml.replace(
-		/<w:sectPr[^>]*w:type="nextPage"[^>]*>/g,
-		`<w:t xml:space="preserve">${PAGE_MARKER}</w:t><w:sectPr>`
+		`</w:p><w:p><w:r><w:t>${PAGE_MARKER}</w:t></w:r></w:p><w:p>`
 	);
 
-	files["word/document.xml"] = strToU8(xml);
-	const newU8 = zipSync(files);
-	const newBuf = newU8.buffer.slice(
-		newU8.byteOffset,
-		newU8.byteOffset + newU8.byteLength
-	) as ArrayBuffer;
+	// استخراج متن ساده
+	const text = extractTextFromDocxXml(xml);
 
-	const mammothMod = mammoth as unknown as MammothModule;
-	const result = await mammothMod.convertToMarkdown({
-		arrayBuffer: newBuf,
-	});
-	let md: string = result.value || "";
-
-	md = md.replace(/<a\s+id="[^"]*"\s*><\/a>/g, "");
-	md = md.replace(/XQZ\\?_?PAGEBREAK\\?_?ZQX/g, PAGE_MARKER);
-	md = md.replace(new RegExp(`(${PAGE_MARKER}\\s*){2,}`, "g"), PAGE_MARKER);
-
-	const chunks = md.split(PAGE_MARKER);
+	// حالا مثل قبل صفحه‌بندی کن
+	const chunks = text.split(PAGE_MARKER);
 
 	const out: string[] = [];
 	out.push("---");
@@ -64,8 +72,8 @@ export async function wordToPages(
 	let isFirstPage = true;
 
 	for (let i = 0; i < chunks.length; i++) {
-		let text = chunks[i].trim();
-		if (i === 0 && !text) continue;
+		let pageText = chunks[i].trim();
+		if (i === 0 && !pageText) continue;
 
 		if (!isFirstPage) {
 			out.push("");
@@ -73,19 +81,19 @@ export async function wordToPages(
 			out.push("");
 		}
 
-		const h1Match = text.match(/^#\s+(.+)$/m);
+		const h1Match = pageText.match(/^#\s+(.+)$/m);
 		if (h1Match) {
 			out.push(`# ${h1Match[1].trim()}`);
 			out.push("");
-			text = text.replace(/^#\s+.+$/m, "").trim();
+			pageText = pageText.replace(/^#\s+.+$/m, "").trim();
 		}
 
-		text = text.replace(
+		pageText = pageText.replace(
 			/^(\s*)\(?\s*صفحه\s*([۰-۹0-9]+)\s*\)?(\s*)$/m,
 			`$1**(صفحه $2)**$3`
 		);
 
-		out.push(text);
+		out.push(pageText);
 		isFirstPage = false;
 	}
 

@@ -15,7 +15,6 @@
 		"typescript": "^5.3.3"
 	},
 	"dependencies": {
-		"fflate": "^0.8.3",
-		"mammoth": "^1.7.0"
+		"fflate": "^0.8.3"
 	}
 }
