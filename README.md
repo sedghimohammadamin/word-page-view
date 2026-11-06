@@ -1,4 +1,4 @@
-# DocuView Pro
+# Word Page View
 
 Display your Obsidian notes as paginated book pages — with page cards, footnotes, colorful comments, highlights, and Word import.
 
@@ -44,7 +44,7 @@ Display your Obsidian notes as paginated book pages — with page cards, footnot
 
 ## Word Import
 
-1. Settings → DocuView Pro → Import from Word
+1. Settings → Word Page View → Import from Word
 2. Select a `.docx` file
 3. A new note with auto-pagination is created
 
@@ -63,7 +63,7 @@ Display your Obsidian notes as paginated book pages — with page cards, footnot
 | Body font | Body text font and size |
 | Header font | Header font and size |
 | Footnote color | Footnote text and highlight color |
-| Start page number | If numbers don't match Word |
+| Start page number | If numbers do not match Word |
 | Show lesson title | Show H1 at top of each page |
 | Show page number | Show number in header |
 
@@ -71,19 +71,19 @@ Display your Obsidian notes as paginated book pages — with page cards, footnot
 
 ### From Obsidian Community Plugins
 
-Settings → Community Plugins → Browse → search: **DocuView Pro**
+Settings → Community Plugins → Browse → search: **Word Page View**
 
 ### Manual
 
-1. Download from [Releases](https://github.com/sedghimohammadamin/docuview-pro/releases)
-2. Place `main.js`, `manifest.json`, `styles.css` in `.obsidian/plugins/docuview-pro/`
+1. Download from [Releases](https://github.com/sedghimohammadamin/word-page-view/releases)
+2. Place `main.js`, `manifest.json`, `styles.css` in `.obsidian/plugins/word-page-view/`
 3. Restart Obsidian
-4. Settings → Community Plugins → DocuView Pro → Enable
+4. Settings → Community Plugins → Word Page View → Enable
 
 ### BRAT
 
 1. Install BRAT
-2. Add Beta Plugin → `sedghimohammadamin/docuview-pro`
+2. Add Beta Plugin → `sedghimohammadamin/word-page-view`
 
 ## License
 
@@ -141,43 +141,9 @@ Mohammad Amin Sedghi
 
 ۳. یادداشت را در حالت Preview باز کن — خودکار به شکل کتاب نمایش داده می‌شود.
 
-### 📄 ایمپورت از Word
-
-۱. Settings → DocuView Pro → ایمپورت از Word
-۲. فایل `.docx` را انتخاب کن
-۳. یادداشت جدید با صفحه‌بندی خودکار ساخته می‌شود
-
-### ⌨️ میان‌برها
-
-- **راست‌کلیک** روی پاراگراف → هایلایت
-- **Cmd/Ctrl + Enter** در ویرایش → ذخیره
-- **Esc** در ویرایش → لغو
-
-### ⚙️ تنظیمات
-
-| تنظیم | توضیح |
-|--------|-------|
-| تم رنگ | سفید، شیری، کرمی، سیاه |
-| عرض کارت | عرض کارت صفحه (px) |
-| فونت متن | فونت و اندازه متن صفحه |
-| فونت هدر | فونت و اندازه هدر |
-| رنگ پاورقی | رنگ متن و هایلایت پاورقی |
-| شروع شماره صفحه | اگر شماره‌ها با Word نمی‌خواند |
-| نمایش عنوان درس | نمایش H1 بالای هر صفحه |
-| نمایش شماره صفحه | نمایش شماره در هدر |
-
 ### 🛠 نصب
 
-#### از فروشگاه Obsidian
-
-Settings → Community Plugins → Browse → جستجو: **DocuView Pro**
-
-#### دستی
-
-۱. از [Releases](https://github.com/sedghimohammadamin/docuview-pro/releases) دانلود کن
-۲. سه فایل `main.js`، `manifest.json`، `styles.css` را در `.obsidian/plugins/docuview-pro/` بگذار
-۳. Obsidian را ری‌استارت کن
-۴. Settings → Community Plugins → DocuView Pro → Enable
+Settings → Community Plugins → Browse → جستجو: **Word Page View**
 
 ### 📝 مجوز
 

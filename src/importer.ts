@@ -1,5 +1,5 @@
 import * as mammoth from "mammoth";
-import JSZip from "jszip";
+import { unzipSync, zipSync, strFromU8, strToU8 } from "fflate";
 
 const PAGE_MARKER = "XQZPAGEBREAKZQX";
 
@@ -15,11 +15,13 @@ export async function wordToPages(
 	buffer: ArrayBuffer,
 	title: string
 ): Promise<string> {
-	const zip = await JSZip.loadAsync(buffer);
-	const docFile = zip.file("word/document.xml");
+	const u8 = new Uint8Array(buffer);
+	const files = unzipSync(u8);
+
+	const docFile = files["word/document.xml"];
 	if (!docFile) throw new Error("فایل docx معتبر نیست");
 
-	let xml = await docFile.async("string");
+	let xml = strFromU8(docFile);
 
 	xml = xml.replace(
 		/<w:br[^>]*w:type="page"[^>]*\/>/g,
@@ -34,8 +36,12 @@ export async function wordToPages(
 		`<w:t xml:space="preserve">${PAGE_MARKER}</w:t><w:sectPr>`
 	);
 
-	zip.file("word/document.xml", xml);
-	const newBuf = await zip.generateAsync({ type: "arraybuffer" });
+	files["word/document.xml"] = strToU8(xml);
+	const newU8 = zipSync(files);
+	const newBuf = newU8.buffer.slice(
+		newU8.byteOffset,
+		newU8.byteOffset + newU8.byteLength
+	) as ArrayBuffer;
 
 	const mammothMod = mammoth as unknown as MammothModule;
 	const result = await mammothMod.convertToMarkdown({
@@ -83,5 +89,6 @@ export async function wordToPages(
 		isFirstPage = false;
 	}
 
+	void title;
 	return out.join("\n");
 }
